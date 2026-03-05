@@ -41,9 +41,9 @@ export default function ResultPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-900/70">
-              OMS Assessment
+              Extractify
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-teal-950">Result Display Page</h1>
+            <h1 className="mt-2 text-3xl font-bold text-teal-950">Processing Results</h1>
           </div>
           <Link
             href="/"

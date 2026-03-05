@@ -35,11 +35,11 @@ export default function Home() {
           <div className="mb-8 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-900/70">
-                OMS Assessment
+                Extractify
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-teal-950">Upload Form</h1>
+              <h1 className="mt-2 text-3xl font-bold text-teal-950">Document Upload</h1>
               <p className="mt-2 max-w-md text-sm text-teal-900/80">
-                Upload a PDF or image and provide your details to continue to result preview.
+                Submit a PDF or image with personal details to process and review extraction results.
               </p>
             </div>
             <div className="hidden rounded-2xl border border-white/40 bg-white/25 px-4 py-3 text-right text-xs text-teal-900 sm:block">
@@ -92,10 +92,7 @@ export default function Home() {
               />
             </label>
 
-            <div className="sm:col-span-2 mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-teal-900/80">
-                Glass UI preview complete. API integration comes in the next step.
-              </p>
+            <div className="sm:col-span-2 mt-2 flex justify-end">
               <button
                 type="submit"
                 className="rounded-xl bg-teal-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-950"
@@ -107,9 +104,9 @@ export default function Home() {
         </section>
 
         <aside className="rounded-3xl border border-white/35 bg-teal-950/35 p-6 text-white shadow-2xl backdrop-blur-xl sm:p-8">
-          <h2 className="text-xl font-semibold">Result Preview Panel</h2>
+          <h2 className="text-xl font-semibold">Processing Overview</h2>
           <p className="mt-2 text-sm text-teal-100/90">
-            This side panel mirrors your inspiration style with a layered glass finish.
+            Review the output fields that will be populated after document processing.
           </p>
 
           <div className="mt-6 space-y-3">
