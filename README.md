@@ -109,13 +109,13 @@ The frontend reads the API base URL from:
 
 Upload page:
 
-![Upload Page](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-e718a2ee-73f1-43a9-8ce4-116c3063801b.png)
+![Upload Page](./src/images/Upload_Page.png)
 
 Filled upload form:
 
-![Filled Upload Form](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-dacfa46c-f7f5-4266-8812-b6d808a9a273.png)
+![Filled Upload Form](./src/images/Filled_Form.png)
 
 Result page:
 
-![Result Page](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-d77f4f77-ad38-4b7b-b58f-41e2ecdd74a4.png)
+![Result Page](./src/images/image.png)
 
