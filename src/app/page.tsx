@@ -1,28 +1,40 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSubmitError("");
+    setIsSubmitting(true);
+
     const form = new FormData(event.currentTarget);
 
-    const firstName = String(form.get("firstName") || "").trim();
-    const lastName = String(form.get("lastName") || "").trim();
-    const dateOfBirth = String(form.get("dateOfBirth") || "").trim();
+    try {
+      const response = await fetch("http://localhost:4000/api/upload", {
+        method: "POST",
+        body: form,
+      });
 
-    // Step 2 UI flow only: pass preview data to the result page.
-    const query = new URLSearchParams({
-      firstName,
-      lastName,
-      dateOfBirth,
-      rawExtractedText: "Raw extracted text will appear here after backend integration.",
-    });
+      const payload = await response.json();
 
-    router.push(`/result?${query.toString()}`);
+      if (!response.ok) {
+        setSubmitError(payload?.error || "Upload failed. Please try again.");
+        return;
+      }
+
+      sessionStorage.setItem("extractifyUploadResult", JSON.stringify(payload));
+      router.push("/result");
+    } catch {
+      setSubmitError("Could not reach API server. Ensure backend is running on port 4000.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -92,12 +104,18 @@ export default function Home() {
               />
             </label>
 
-            <div className="sm:col-span-2 mt-2 flex justify-end">
+            <div className="sm:col-span-2 mt-2 flex flex-col items-end gap-3">
+              {submitError ? (
+                <p className="w-full rounded-xl border border-red-300/60 bg-red-50/70 px-4 py-2 text-sm text-red-700">
+                  {submitError}
+                </p>
+              ) : null}
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="rounded-xl bg-teal-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-950"
               >
-                Continue to Result Page
+                {isSubmitting ? "Processing..." : "Process Document"}
               </button>
             </div>
           </form>

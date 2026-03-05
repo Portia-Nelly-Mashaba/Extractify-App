@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useSyncExternalStore } from "react";
 
 function calculateAge(dateOfBirth: string): string {
   if (!dateOfBirth) return "-";
@@ -21,14 +20,90 @@ function calculateAge(dateOfBirth: string): string {
   return years >= 0 ? String(years) : "-";
 }
 
-export default function ResultPage() {
-  const params = useSearchParams();
+type UploadResult = {
+  input?: {
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+  };
+  rawExtractedText?: string;
+};
 
-  const firstName = params.get("firstName") || "";
-  const lastName = params.get("lastName") || "";
+function looksLikeSectionHeader(line: string): boolean {
+  return /^[A-Z0-9\s/&(),.-]{3,}$/.test(line) && line.length <= 42;
+}
+
+function formatStructuredPreview(text: string): string {
+  const lines = text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length === 0) return "No extracted text returned.";
+
+  const output: string[] = [];
+  let paragraph = "";
+
+  for (const line of lines) {
+    const isHeader = looksLikeSectionHeader(line);
+    const startsNewSentence = /^[A-Z][a-z]/.test(line);
+    const currentEndsStrong = /[.:;!?)]$/.test(paragraph);
+
+    if (isHeader) {
+      if (paragraph) {
+        output.push(paragraph.trim());
+        paragraph = "";
+      }
+      output.push(line);
+      continue;
+    }
+
+    if (!paragraph) {
+      paragraph = line;
+      continue;
+    }
+
+    if (currentEndsStrong || startsNewSentence) {
+      output.push(paragraph.trim());
+      paragraph = line;
+      continue;
+    }
+
+    paragraph = `${paragraph} ${line}`;
+  }
+
+  if (paragraph) output.push(paragraph.trim());
+
+  return output.join("\n\n");
+}
+
+function readUploadResultSnapshot(): string {
+  if (typeof window === "undefined") return "";
+  return window.sessionStorage.getItem("extractifyUploadResult") || "";
+}
+
+export default function ResultPage() {
+  const snapshot = useSyncExternalStore(() => () => {}, readUploadResultSnapshot, () => "");
+  const result = useMemo<UploadResult | null>(() => {
+    if (!snapshot) return null;
+
+    try {
+      return JSON.parse(snapshot) as UploadResult;
+    } catch {
+      return null;
+    }
+  }, [snapshot]);
+
+  const firstName = result?.input?.firstName || "";
+  const lastName = result?.input?.lastName || "";
   const fullName = `${firstName} ${lastName}`.trim() || "Not provided";
-  const dateOfBirth = params.get("dateOfBirth") || "";
-  const rawExtractedText = params.get("rawExtractedText") || "No extracted text available yet.";
+  const dateOfBirth = result?.input?.dateOfBirth || "";
+  const rawExtractedText = result?.rawExtractedText || "No extracted text returned.";
+  const normalizedText = rawExtractedText.replace(/\r\n/g, "\n").trim();
+  const structuredText = formatStructuredPreview(normalizedText);
+  const lineCount = structuredText.split("\n").length;
+  const charCount = structuredText.length;
 
   const age = useMemo(() => calculateAge(dateOfBirth), [dateOfBirth]);
 
@@ -65,10 +140,35 @@ export default function ResultPage() {
           </article>
 
           <article className="rounded-xl border border-white/40 bg-white/45 p-5 sm:col-span-2">
-            <p className="text-xs uppercase tracking-wide text-teal-800/80">Raw Extracted Text</p>
-            <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap text-sm leading-6 text-teal-950">
-              {rawExtractedText}
-            </pre>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs uppercase tracking-wide text-teal-800/80">Raw Extracted Text</p>
+              <div className="flex items-center gap-2 text-[11px] font-medium text-teal-900/80">
+                <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
+                  {lineCount} lines
+                </span>
+                <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
+                  {charCount} chars
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-teal-900/10 bg-white/55 p-4 shadow-inner">
+              <p className="mb-2 text-xs font-medium uppercase tracking-[0.15em] text-teal-800/70">
+                Document Preview
+              </p>
+              <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-teal-950/5 p-3 font-mono text-[13px] leading-6 text-teal-950">
+                {structuredText}
+              </pre>
+            </div>
+
+            <details className="mt-3 rounded-xl border border-teal-900/10 bg-white/45 p-3">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-teal-900/70">
+                View Raw OCR Text
+              </summary>
+              <pre className="mt-3 max-h-52 overflow-auto whitespace-pre-wrap rounded-lg bg-teal-950/5 p-3 font-mono text-[12px] leading-5 text-teal-950">
+                {normalizedText || "No extracted text returned."}
+              </pre>
+            </details>
           </article>
         </div>
       </section>
