@@ -1,65 +1,135 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+
+    const firstName = String(form.get("firstName") || "").trim();
+    const lastName = String(form.get("lastName") || "").trim();
+    const dateOfBirth = String(form.get("dateOfBirth") || "").trim();
+
+    // Step 2 UI flow only: pass preview data to the result page.
+    const query = new URLSearchParams({
+      firstName,
+      lastName,
+      dateOfBirth,
+      rawExtractedText: "Raw extracted text will appear here after backend integration.",
+    });
+
+    router.push(`/result?${query.toString()}`);
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-emerald-300 via-cyan-200 to-teal-400 px-4 py-10">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/35 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-cyan-100/40 blur-3xl" />
+
+      <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="rounded-3xl border border-white/35 bg-white/20 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-900/70">
+                OMS Assessment
+              </p>
+              <h1 className="mt-2 text-3xl font-bold text-teal-950">Upload Form</h1>
+              <p className="mt-2 max-w-md text-sm text-teal-900/80">
+                Upload a PDF or image and provide your details to continue to result preview.
+              </p>
+            </div>
+            <div className="hidden rounded-2xl border border-white/40 bg-white/25 px-4 py-3 text-right text-xs text-teal-900 sm:block">
+              <p className="font-semibold">Step 2 of 5</p>
+              <p>Frontend Pages</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            <label className="sm:col-span-1">
+              <span className="mb-2 block text-sm font-semibold text-teal-950">First Name</span>
+              <input
+                name="firstName"
+                required
+                className="w-full rounded-xl border border-white/45 bg-white/55 px-4 py-3 text-sm text-teal-950 outline-none placeholder:text-teal-700/60 focus:ring-2 focus:ring-teal-500/50"
+                placeholder="Enter first name"
+                type="text"
+              />
+            </label>
+
+            <label className="sm:col-span-1">
+              <span className="mb-2 block text-sm font-semibold text-teal-950">Last Name</span>
+              <input
+                name="lastName"
+                required
+                className="w-full rounded-xl border border-white/45 bg-white/55 px-4 py-3 text-sm text-teal-950 outline-none placeholder:text-teal-700/60 focus:ring-2 focus:ring-teal-500/50"
+                placeholder="Enter last name"
+                type="text"
+              />
+            </label>
+
+            <label className="sm:col-span-1">
+              <span className="mb-2 block text-sm font-semibold text-teal-950">Date of Birth</span>
+              <input
+                name="dateOfBirth"
+                required
+                className="w-full rounded-xl border border-white/45 bg-white/55 px-4 py-3 text-sm text-teal-950 outline-none focus:ring-2 focus:ring-teal-500/50"
+                type="date"
+              />
+            </label>
+
+            <label className="sm:col-span-1">
+              <span className="mb-2 block text-sm font-semibold text-teal-950">File (PDF or Image)</span>
+              <input
+                name="file"
+                required
+                accept=".pdf,image/*"
+                className="w-full rounded-xl border border-white/45 bg-white/55 px-3 py-2 text-sm text-teal-900 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-700 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-teal-800"
+                type="file"
+              />
+            </label>
+
+            <div className="sm:col-span-2 mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-teal-900/80">
+                Glass UI preview complete. API integration comes in the next step.
+              </p>
+              <button
+                type="submit"
+                className="rounded-xl bg-teal-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-950"
+              >
+                Continue to Result Page
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <aside className="rounded-3xl border border-white/35 bg-teal-950/35 p-6 text-white shadow-2xl backdrop-blur-xl sm:p-8">
+          <h2 className="text-xl font-semibold">Result Preview Panel</h2>
+          <p className="mt-2 text-sm text-teal-100/90">
+            This side panel mirrors your inspiration style with a layered glass finish.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+          <div className="mt-6 space-y-3">
+            <div className="rounded-xl border border-white/20 bg-white/10 p-4">
+              <p className="text-xs uppercase tracking-wide text-teal-100/70">Full Name</p>
+              <p className="mt-1 text-sm font-medium">Awaiting input</p>
+            </div>
+            <div className="rounded-xl border border-white/20 bg-white/10 p-4">
+              <p className="text-xs uppercase tracking-wide text-teal-100/70">Age</p>
+              <p className="mt-1 text-sm font-medium">Calculated on result page</p>
+            </div>
+            <div className="rounded-xl border border-white/20 bg-white/10 p-4">
+              <p className="text-xs uppercase tracking-wide text-teal-100/70">Raw Extracted Text</p>
+              <p className="mt-1 text-sm font-medium text-teal-50/90">
+                Shown after upload is processed in backend step.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
   );
 }
