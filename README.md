@@ -23,6 +23,7 @@ Extractify is a full-stack assessment project that accepts a PDF or image upload
   - `age`
   - `rawExtractedText`
 - Result page displays extracted output with a readable preview.
+- `rawExtractedText` is returned as raw output from `pdf-parse`/`tesseract.js`.
 
 ## Project Structure
 
@@ -87,6 +88,10 @@ Example success response:
 }
 ```
 
+Notes:
+- `rawExtractedText` can be noisy for low-quality images; this is expected OCR behavior.
+- For best extraction quality, use high-resolution document images or PDF files.
+
 ## Environment
 
 The frontend reads the API base URL from:
@@ -99,3 +104,18 @@ The frontend reads the API base URL from:
 - [ ] Upload an image and confirm OCR text appears on result page
 - [ ] Validate age calculation from date of birth
 - [ ] Confirm validation errors for missing required fields
+
+## Screenshots
+
+Upload page:
+
+![Upload Page](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-e718a2ee-73f1-43a9-8ce4-116c3063801b.png)
+
+Filled upload form:
+
+![Filled Upload Form](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-dacfa46c-f7f5-4266-8812-b6d808a9a273.png)
+
+Result page:
+
+![Result Page](file:///C:/Users/User/.cursor/projects/c-Users-User-Documents-Nelly-Extractify-NextJS-extractify-app/assets/c__Users_User_AppData_Roaming_Cursor_User_workspaceStorage_f2e75a06877647caf7760c43b88bde06_images_image-d77f4f77-ad38-4b7b-b58f-41e2ecdd74a4.png)
+

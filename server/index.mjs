@@ -9,15 +9,18 @@ const app = express();
 const port = Number(process.env.API_PORT || 4000);
 
 const upload = multer({
+  // Keep files in memory for immediate OCR/PDF parsing.
   storage: multer.memoryStorage(),
 });
 
 app.use(cors());
 app.use(express.json());
 
+// Reuse one OCR worker across requests to reduce startup overhead.
 let ocrWorkerPromise = null;
 
 function calculateAge(dateOfBirth) {
+  // Convert user input to a Date and reject invalid values.
   const birthDate = new Date(dateOfBirth);
   if (Number.isNaN(birthDate.getTime())) return null;
 
@@ -86,6 +89,7 @@ function hasMeaningfulText(text, confidence) {
 }
 
 async function preprocessImageForOcr(buffer, mode) {
+  // Normalize images before OCR to improve consistency across uploads.
   const pipeline = sharp(buffer)
     .rotate()
     .resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true })
@@ -102,6 +106,7 @@ async function preprocessImageForOcr(buffer, mode) {
 async function getOcrWorker() {
   if (!ocrWorkerPromise) {
     ocrWorkerPromise = (async () => {
+      // Initialize once and reuse for all subsequent OCR requests.
       const worker = await createWorker("eng");
       await worker.setParameters({
         preserve_interword_spaces: "1",
@@ -123,12 +128,14 @@ async function runOcr(buffer, psmMode) {
   const result = await worker.recognize(buffer);
 
   return {
+    // Preserve the original OCR text output (no post-processing here).
     text: result?.data?.text?.trim() || "",
     confidence: Number(result?.data?.confidence || 0),
   };
 }
 
 async function extractTextFromImage(fileBuffer) {
+  // Fast first pass for low latency on clear document photos.
   const baseBuffer = await preprocessImageForOcr(fileBuffer, "base");
   const primary = await runOcr(baseBuffer, PSM.SINGLE_BLOCK);
 
@@ -152,18 +159,19 @@ async function extractTextFromImage(fileBuffer) {
     })[0] || null;
 
   if (!bestCandidate) return "";
-  if (!hasMeaningfulText(bestCandidate.text, bestCandidate.confidence)) return "";
-
+  // Return raw OCR text from the best candidate to match assessment output strictly.
   return bestCandidate.text;
 }
 
 async function extractRawText(file) {
   if (isPdf(file)) {
+    // pdf-parse already returns extracted raw text content.
     const result = await pdfParse(file.buffer);
     return result.text?.trim() || "";
   }
 
   if (isImage(file)) {
+    // OCR path for image uploads.
     return extractTextFromImage(file.buffer);
   }
 
@@ -191,6 +199,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
   }
 
   try {
+    // Assessment response requires Full Name, Age, and Raw Extracted Text.
     const rawExtractedText = await extractRawText(req.file);
     const fullName = `${String(firstName).trim()} ${String(lastName).trim()}`.trim();
 
