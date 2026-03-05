@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Extractify
 
-## Getting Started
+Extractify is a full-stack assessment project that accepts a PDF or image upload, extracts raw text from the document, calculates age from the submitted date of birth, and displays the processed result in a clean Next.js UI.
 
-First, run the development server:
+## Tech Stack
+
+- Frontend: Next.js (App Router), TypeScript, Tailwind CSS
+- Backend: Express.js, Multer
+- Text extraction:
+  - `pdf-parse` for PDF files
+  - `tesseract.js` for image files
+
+## Features
+
+- Upload form with:
+  - First name
+  - Last name
+  - Date of birth
+  - File input (PDF/image)
+- API endpoint: `POST /api/upload`
+- API response includes:
+  - `fullName`
+  - `age`
+  - `rawExtractedText`
+- Result page displays extracted output with a readable preview.
+
+## Project Structure
+
+```txt
+extractify_app/
+├─ server/
+│  └─ index.mjs           # Express API server
+├─ src/
+│  └─ app/
+│     ├─ page.tsx         # Upload page
+│     ├─ result/page.tsx  # Result page
+│     ├─ layout.tsx
+│     └─ globals.css
+├─ package.json
+└─ README.md
+```
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the API server:
+
+```bash
+npm run dev:api
+```
+
+3. Start the frontend app in another terminal:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local URLs
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:4000`
+- API health check: `http://localhost:4000/api/health`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Contract
 
-## Learn More
+### `POST /api/upload`
 
-To learn more about Next.js, take a look at the following resources:
+Accepts `multipart/form-data`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `firstName` (string, required)
+- `lastName` (string, required)
+- `dateOfBirth` (YYYY-MM-DD, required)
+- `file` (PDF or image, required)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Example success response:
 
-## Deploy on Vercel
+```json
+{
+  "fullName": "Jane Doe",
+  "age": 28,
+  "rawExtractedText": "..."
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The frontend reads the API base URL from:
+
+- `NEXT_PUBLIC_API_URL` (optional, defaults to `http://localhost:4000`)
+
+## Testing Checklist
+
+- [ ] Upload a PDF and confirm extracted text appears on result page
+- [ ] Upload an image and confirm OCR text appears on result page
+- [ ] Validate age calculation from date of birth
+- [ ] Confirm validation errors for missing required fields

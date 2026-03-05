@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 export default function Home() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,7 +18,7 @@ export default function Home() {
     const form = new FormData(event.currentTarget);
 
     try {
-      const response = await fetch("http://localhost:4000/api/upload", {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: "POST",
         body: form,
       });
@@ -51,12 +53,8 @@ export default function Home() {
               </p>
               <h1 className="mt-2 text-3xl font-bold text-teal-950">Document Upload</h1>
               <p className="mt-2 max-w-md text-sm text-teal-900/80">
-                Submit a PDF or image with personal details to process and review extraction results.
+                Upload your document, validate your profile details, and get extraction results instantly.
               </p>
-            </div>
-            <div className="hidden rounded-2xl border border-white/40 bg-white/25 px-4 py-3 text-right text-xs text-teal-900 sm:block">
-              <p className="font-semibold">Step 2 of 5</p>
-              <p>Frontend Pages</p>
             </div>
           </div>
 
@@ -88,7 +86,7 @@ export default function Home() {
               <input
                 name="dateOfBirth"
                 required
-                className="w-full rounded-xl border border-white/45 bg-white/55 px-4 py-3 text-sm text-teal-950 outline-none focus:ring-2 focus:ring-teal-500/50"
+                className="w-full appearance-auto rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-teal-500/40"
                 type="date"
               />
             </label>
@@ -113,7 +111,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-xl bg-teal-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-950"
+                className="rounded-xl bg-teal-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-950 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? "Processing..." : "Process Document"}
               </button>
@@ -122,25 +120,21 @@ export default function Home() {
         </section>
 
         <aside className="rounded-3xl border border-white/35 bg-teal-950/35 p-6 text-white shadow-2xl backdrop-blur-xl sm:p-8">
-          <h2 className="text-xl font-semibold">Processing Overview</h2>
-          <p className="mt-2 text-sm text-teal-100/90">
-            Review the output fields that will be populated after document processing.
-          </p>
+          <h2 className="text-xl font-semibold">What You Get</h2>
+          <p className="mt-2 text-sm text-teal-100/90">The result page returns these verified outputs.</p>
 
           <div className="mt-6 space-y-3">
             <div className="rounded-xl border border-white/20 bg-white/10 p-4">
               <p className="text-xs uppercase tracking-wide text-teal-100/70">Full Name</p>
-              <p className="mt-1 text-sm font-medium">Awaiting input</p>
+              <p className="mt-1 text-sm font-medium">Generated from first and last name</p>
             </div>
             <div className="rounded-xl border border-white/20 bg-white/10 p-4">
               <p className="text-xs uppercase tracking-wide text-teal-100/70">Age</p>
-              <p className="mt-1 text-sm font-medium">Calculated on result page</p>
+              <p className="mt-1 text-sm font-medium">Calculated from date of birth</p>
             </div>
             <div className="rounded-xl border border-white/20 bg-white/10 p-4">
               <p className="text-xs uppercase tracking-wide text-teal-100/70">Raw Extracted Text</p>
-              <p className="mt-1 text-sm font-medium text-teal-50/90">
-                Shown after upload is processed in backend step.
-              </p>
+              <p className="mt-1 text-sm font-medium text-teal-50/90">Extracted using OCR or PDF parsing.</p>
             </div>
           </div>
         </aside>

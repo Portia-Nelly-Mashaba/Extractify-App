@@ -3,29 +3,9 @@
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
-function calculateAge(dateOfBirth: string): string {
-  if (!dateOfBirth) return "-";
-
-  const date = new Date(dateOfBirth);
-  if (Number.isNaN(date.getTime())) return "-";
-
-  const now = new Date();
-  let years = now.getFullYear() - date.getFullYear();
-  const monthDiff = now.getMonth() - date.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())) {
-    years -= 1;
-  }
-
-  return years >= 0 ? String(years) : "-";
-}
-
 type UploadResult = {
-  input?: {
-    firstName?: string;
-    lastName?: string;
-    dateOfBirth?: string;
-  };
+  fullName?: string;
+  age?: number;
   rawExtractedText?: string;
 };
 
@@ -95,17 +75,15 @@ export default function ResultPage() {
     }
   }, [snapshot]);
 
-  const firstName = result?.input?.firstName || "";
-  const lastName = result?.input?.lastName || "";
-  const fullName = `${firstName} ${lastName}`.trim() || "Not provided";
-  const dateOfBirth = result?.input?.dateOfBirth || "";
-  const rawExtractedText = result?.rawExtractedText || "No extracted text returned.";
+  const fullName = result?.fullName || "Not provided";
+  const age = typeof result?.age === "number" ? String(result.age) : "-";
+  const rawExtractedText = result?.rawExtractedText || "";
   const normalizedText = rawExtractedText.replace(/\r\n/g, "\n").trim();
-  const structuredText = formatStructuredPreview(normalizedText);
-  const lineCount = structuredText.split("\n").length;
-  const charCount = structuredText.length;
-
-  const age = useMemo(() => calculateAge(dateOfBirth), [dateOfBirth]);
+  const hasExtractedText = normalizedText.length > 0;
+  const structuredText = hasExtractedText ? formatStructuredPreview(normalizedText) : "";
+  const lineCount = hasExtractedText ? normalizedText.split("\n").length : 0;
+  const charCount = hasExtractedText ? normalizedText.length : 0;
+  const hasResult = Boolean(result);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-cyan-300 via-emerald-200 to-teal-500 px-4 py-10">
@@ -140,16 +118,23 @@ export default function ResultPage() {
           </article>
 
           <article className="rounded-xl border border-white/40 bg-white/45 p-5 sm:col-span-2">
+            {!hasResult ? (
+              <p className="rounded-lg border border-amber-300/50 bg-amber-50/70 px-3 py-2 text-sm text-amber-800">
+                No processed result found. Upload a document first to view extracted text.
+              </p>
+            ) : null}
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-wide text-teal-800/80">Raw Extracted Text</p>
-              <div className="flex items-center gap-2 text-[11px] font-medium text-teal-900/80">
-                <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
-                  {lineCount} lines
-                </span>
-                <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
-                  {charCount} chars
-                </span>
-              </div>
+              {hasExtractedText ? (
+                <div className="flex items-center gap-2 text-[11px] font-medium text-teal-900/80">
+                  <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
+                    {lineCount} lines
+                  </span>
+                  <span className="rounded-full border border-teal-800/15 bg-white/55 px-2 py-1">
+                    {charCount} chars
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-3 rounded-xl border border-teal-900/10 bg-white/55 p-4 shadow-inner">
@@ -157,18 +142,22 @@ export default function ResultPage() {
                 Document Preview
               </p>
               <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-teal-950/5 p-3 font-mono text-[13px] leading-6 text-teal-950">
-                {structuredText}
+                {hasExtractedText
+                  ? structuredText
+                  : "No readable text detected. Try a clearer image or upload a PDF document."}
               </pre>
             </div>
 
-            <details className="mt-3 rounded-xl border border-teal-900/10 bg-white/45 p-3">
-              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-teal-900/70">
-                View Raw OCR Text
-              </summary>
-              <pre className="mt-3 max-h-52 overflow-auto whitespace-pre-wrap rounded-lg bg-teal-950/5 p-3 font-mono text-[12px] leading-5 text-teal-950">
-                {normalizedText || "No extracted text returned."}
-              </pre>
-            </details>
+            {hasExtractedText ? (
+              <details className="mt-3 rounded-xl border border-teal-900/10 bg-white/45 p-3">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-teal-900/70">
+                  View Raw OCR Text
+                </summary>
+                <pre className="mt-3 max-h-52 overflow-auto whitespace-pre-wrap rounded-lg bg-teal-950/5 p-3 font-mono text-[12px] leading-5 text-teal-950">
+                  {normalizedText}
+                </pre>
+              </details>
+            ) : null}
           </article>
         </div>
       </section>
